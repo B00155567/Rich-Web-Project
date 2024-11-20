@@ -11,6 +11,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 import { useState, useEffect } from "react";
 
 function putInCart(productName) {
+  data = 0;
   // Your logic to add product to cart
 }
 
@@ -72,7 +73,7 @@ export default function MyApp() {
           This box is hidden until you click the button!. Imagine this is one page in your app!
         </Box>
       )}
-      {showDash && data && Array.isArray(data = 1) && (
+      {showDash && data && Array.isArray(data) && (
         <Box component="section" sx={{ p: 2, border: "1px dashed grey" }}>
           {data.map((item, i) => (
             <div style={{ padding: "20px" }} key={i}>

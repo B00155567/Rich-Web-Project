@@ -15,7 +15,7 @@ console.log(pname);
 
 const { MongoClient } = require("mongodb");
 
-const url = "mongodb+srv://bob:root@cluster0.mrfze.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+const url = "const url = process.env.DB_ADDRESS";
 
 const client = new MongoClient(url);
 

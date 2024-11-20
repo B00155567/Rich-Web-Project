@@ -11,6 +11,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 import { useState, useEffect } from "react";
 
 function putInCart(productName) {
+  data = 0;
   // Your logic to add product to cart
 }
 

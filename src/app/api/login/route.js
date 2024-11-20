@@ -13,7 +13,7 @@ console.log(pass);
 
 // =================================================
 const { MongoClient } = require('mongodb');
-const url = 'process.env.DB_ADDRESS';
+const url = process.env.DB_ADDRESS;
 const client = new MongoClient(url);
 const dbName = 'app'; // database name
 await client.connect();

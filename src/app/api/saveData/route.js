@@ -9,7 +9,7 @@ export async function GET(req, res) {
 
   await session.save()
 
-  console.log(“data saved”)
+  console.log("data saved")
   return Response.json({})
 
 }

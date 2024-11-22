@@ -1,37 +1,72 @@
-export async function GET(req, res) {
-// Make a note we are on
-// the api. This goes to the console.
-console.log("in the register api page")
-// get the values
-// that were sent across to us.
-const { searchParams } = new URL(req.url)
-const email = searchParams.get('email')
-const pass = searchParams.get('pass')
+import { MongoClient } from 'mongodb';
+import { getCustomSession } from "../sessionCode.js";
 
-console.log(email);
-console.log(pass);
+export async function GET(req) {
+  console.log("In the register API page");
 
-// =================================================
-const { MongoClient } = require('mongodb');
-const url = process.env.DB_ADDRESS;
-const client = new MongoClient(url);
-const dbName = 'app'; // database name
-await client.connect();
-console.log('Connected successfully to server');
-const db = client.db(dbName);
-const collection = db.collection('login'); // collection name
-const findResult = await collection.find({"username":
-email}).toArray();
-console.log('Found documents =>', findResult);
-let valid = false
-if(findResult.length >0 ){
-valid = true;
-console.log("login valid")
-} else {
-valid = false;
-console.log("login invalid")
-}
-//==========================================================
-// at the end of the process we need to send something back.
-return Response.json({ "data":"" + valid + ""})
+  // Extract email and password from query parameters
+  const { searchParams } = new URL(req.url);
+  const email = searchParams.get('email');
+  const pass = searchParams.get('pass');
+
+  console.log("Received credentials:", { email, pass });
+
+  // ==========================================================
+  const url = process.env.DB_ADDRESS;
+  const client = new MongoClient(url);
+  const dbName = 'app'; // database name
+
+  try {
+    await client.connect();
+    console.log('Connected successfully to server');
+
+    const db = client.db(dbName);
+    const collection = db.collection('login'); // collection name
+
+    // Check if user exists with the provided email and validate credentials
+    const findResult = await collection.find({ "username": email }).toArray();
+    console.log('Found documents =>', findResult);
+
+    let valid = false;
+
+    if (findResult.length > 0) {
+      valid = true;
+      console.log("Login valid");
+
+      // Save session data
+      const session = await getCustomSession();
+      session.role = "customer"; // Set user role
+      session.email = email; // Store the email in session
+      await session.save(); // Save the session
+
+      console.log("Session saved successfully:", { role: session.role, email: session.email });
+    } else {
+      valid = false;
+      console.log("Login invalid");
+    }
+
+    // ==========================================================
+    // Return the response
+    return new Response(
+      JSON.stringify({ valid }),
+      {
+        status: valid ? 200 : 401,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+  } catch (error) {
+    console.error("Error in login API:", error);
+
+    // Handle errors gracefully
+    return new Response(
+      JSON.stringify({ error: "Internal server error" }),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+  } finally {
+    await client.close(); // Ensure the DB connection is closed
+    console.log("Database connection closed.");
+  }
 }

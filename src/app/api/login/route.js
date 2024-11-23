@@ -1,63 +1,60 @@
-import { MongoClient } from 'mongodb';
+import { MongoClient } from "mongodb";
 import { getCustomSession } from "../sessionCode.js";
 
 export async function GET(req) {
-  console.log("In the register API page");
+  console.log("In the login API page");
 
-  // Extract email and password from query parameters
+  // Extract username and password from query parameters
   const { searchParams } = new URL(req.url);
-  const email = searchParams.get('email');
-  const pass = searchParams.get('pass');
+  const username = searchParams.get("username");
+  const pass = searchParams.get("pass");
 
-  console.log("Received credentials:", { email, pass });
+  console.log("Received credentials:", { username, pass });
 
-  // ==========================================================
   const url = process.env.DB_ADDRESS;
   const client = new MongoClient(url);
-  const dbName = 'app'; // database name
+  const dbName = "app"; // Database name
 
   try {
     await client.connect();
-    console.log('Connected successfully to server');
+    console.log("Connected successfully to server");
 
     const db = client.db(dbName);
-    const collection = db.collection('login'); // collection name
+    const collection = db.collection("users"); // Correct collection name
 
-    // Check if user exists with the provided email and validate credentials
-    const findResult = await collection.find({ "username": email }).toArray();
-    console.log('Found documents =>', findResult);
+    // Query the users collection for the provided username
+    console.log(`Querying for username: ${username}`);
+    const findResult = await collection.findOne({ username: username });
 
-    let valid = false;
-
-    if (findResult.length > 0) {
-      valid = true;
-      console.log("Login valid");
-
-      // Save session data
-      const session = await getCustomSession();
-      session.role = "customer"; // Set user role
-      session.email = email; // Store the email in session
-      await session.save(); // Save the session
-
-      console.log("Session saved successfully:", { role: session.role, email: session.email });
-    } else {
-      valid = false;
-      console.log("Login invalid");
+    if (!findResult || findResult.pass !== pass) {
+      console.log("Invalid username or password");
+      return new Response(
+        JSON.stringify({ valid: false, message: "Invalid username or password" }),
+        {
+          status: 401,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
     }
 
-    // ==========================================================
-    // Return the response
+    // Save session data
+    const session = await getCustomSession();
+    session.role = findResult.role || "customer"; // Assign role or default to 'customer'
+    session.email = username; // Store username in session
+    await session.save();
+
+    console.log("Session saved successfully:", { role: session.role, email: session.email });
+
     return new Response(
-      JSON.stringify({ valid }),
+      JSON.stringify({ valid: true, role: session.role }),
       {
-        status: valid ? 200 : 401,
+        status: 200,
         headers: { "Content-Type": "application/json" },
       }
     );
   } catch (error) {
     console.error("Error in login API:", error);
 
-    // Handle errors gracefully
     return new Response(
       JSON.stringify({ error: "Internal server error" }),
       {
@@ -66,7 +63,7 @@ export async function GET(req) {
       }
     );
   } finally {
-    await client.close(); // Ensure the DB connection is closed
+    await client.close();
     console.log("Database connection closed.");
   }
 }

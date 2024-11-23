@@ -14,11 +14,11 @@ export default function Home({ runShowDash }) {
   const handleSubmit = async (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    const email = data.get("email");
+    const username = data.get("username");
     const pass = data.get("pass");
 
     try {
-        const res = await fetch(`/api/login?email=${email}&pass=${pass}`);
+        const res = await fetch(`/api/login?username=${username}&pass=${pass}`);
         const result = await res.json();
       
         console.log(result); // Debug the API response to verify its structure
@@ -44,10 +44,10 @@ export default function Home({ runShowDash }) {
             margin="normal"
             required
             fullWidth
-            id="email"
+            id="username"
             label="Email Address"
-            name="email"
-            autoComplete="email"
+            name="username"
+            autoComplete="username"
             autoFocus
           />
           <TextField

@@ -1,47 +1,65 @@
 "use client";
 import * as React from "react";
-import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Checkbox from "@mui/material/Checkbox";
-import Link from "@mui/material/Link";
 import Container from "@mui/material/Container";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
+import Login from "./login"; // Import the login page
 
 export default function Home() {
+  const [showLogin, setShowLogin] = React.useState(false); // State to toggle between Register and Login
+
   const handleSubmit = async (event) => {
-    console.log("handling submit");
+    console.log("Handling submit");
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    let email = data.get("email");
+    let username = data.get("username");
     let pass = data.get("pass");
     let firstName = data.get("firstName");
     let secondName = data.get("secondName");
     let address = data.get("address");
     let tel = data.get("tel");
-    console.log("Sent email:" + email);
-    console.log("Sent pass:" + pass);
-    console.log("Sent firstName:" + firstName);
-    console.log("Sent secondName:" + secondName);
-    console.log("Sent address:" + address);
-    console.log("Sent tel:" + tel);
 
-    const response = await runDBCallAsync(
-      `/api/register?email=${email}&pass=${pass}&firstName=${firstName}&secondName=${secondName}&address=${address}&tel=${tel}`
-    );
-    if (response.success) {
-      console.log("Registration successful!");
-    } else {
-      console.log("Registration failed:", response.message);
+    console.log("Sent username:", username);
+    console.log("Sent pass:", pass);
+    console.log("Sent firstName:", firstName);
+    console.log("Sent secondName:", secondName);
+    console.log("Sent address:", address);
+    console.log("Sent tel:", tel);
+
+    try {
+      const response = await runDBCallAsync(
+        `/api/register?username=${username}&pass=${pass}&firstName=${firstName}&secondName=${secondName}&address=${address}&tel=${tel}`
+      );
+
+      if (response.success) {
+        console.log("Registration successful!");
+        //alert("Registration successful! Redirecting to login...");
+        setShowLogin(true); // Show login component
+      } else {
+        console.log("Registration failed:", response.message);
+        alert(`Registration failed: ${response.message}`);
+      }
+    } catch (error) {
+      console.error("Error during registration:", error);
+      alert("An error occurred. Please try again.");
     }
   };
 
   async function runDBCallAsync(url) {
     const res = await fetch(url);
-    const data = await res.json();
-    return data;
+    if (!res.ok) {
+      throw new Error(`HTTP error! status: ${res.status}`);
+    }
+    return res.json();
+  }
+
+  // If `showLogin` is true, render the Login component
+  if (showLogin) {
+    return <Login />;
   }
 
   return (
@@ -90,10 +108,10 @@ export default function Home() {
             margin="normal"
             required
             fullWidth
-            id="email"
+            id="username"
             label="Email Address"
-            name="email"
-            autoComplete="email"
+            name="username"
+            autoComplete="username"
           />
           <TextField
             margin="normal"

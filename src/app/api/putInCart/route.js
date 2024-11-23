@@ -1,52 +1,93 @@
 import { getCustomSession } from "../sessionCode.js";
 const { MongoClient } = require("mongodb");
 
-export async function GET(req, res) {
-  console.log("in the putInCart API page");
+export async function GET(req) {
+  console.log("In the putInCart API page");
 
-  // Validate the session
-  const session = await getCustomSession();
-  if (!session || !session.email) {
-    // No session or user is not logged in
-    return Response.json({
-      success: false,
-      message: "Unauthorized: Please log in to add items to your cart.",
-    });
-  }
-
-  console.log("Session validated for:", session.email);
-
-  // Get the values sent in the request
-  const { searchParams } = new URL(req.url);
-  const pname = searchParams.get("pname");
-
-  if (!pname) {
-    return Response.json({
-      success: false,
-      message: "Invalid request. Missing product name.",
-    });
-  }
-
-  console.log("Product name:", pname);
-
-  // Connect to MongoDB
-  const url = process.env.DB_ADDRESS;
+  const url = process.env.DB_ADDRESS; // MongoDB connection string
   const client = new MongoClient(url);
-  await client.connect();
-  console.log("Connected successfully to server");
+  const dbName = "app"; // Database name
 
-  const db = client.db("app"); // Database name
-  const collection = db.collection("shopping_cart"); // Collection name
+  try {
+    // Validate the session
+    const session = await getCustomSession();
+    if (!session || !session.email) {
+      console.log("Unauthorized access attempt");
+      return new Response(
+        JSON.stringify({
+          success: false,
+          message: "Unauthorized: Please log in to add items to your cart.",
+        }),
+        {
+          status: 401,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    }
 
-  // Insert the product into the cart for the logged-in user
-  var myobj = { pname: pname, username: session.email };
-  const insertResult = await collection.insertOne(myobj);
+    console.log("Session validated for:", session.email);
 
-  console.log("Item added to cart:", insertResult);
+    // Get the product name from the request
+    const { searchParams } = new URL(req.url);
+    const pname = searchParams.get("pname");
 
-  // Respond to the client
-  return Response.json({
-    success: true,
-    message: "Item added to cart successfully.",
-  });
+    if (!pname) {
+      console.log("Invalid request: Missing product name");
+      return new Response(
+        JSON.stringify({
+          success: false,
+          message: "Invalid request: Missing product name.",
+        }),
+        {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    console.log("Product name:", pname);
+
+    // Connect to MongoDB
+    await client.connect();
+    console.log("Connected successfully to server");
+
+    const db = client.db(dbName);
+    const collection = db.collection("cart");
+
+    // Add or update the product in the cart
+    const updateResult = await collection.updateOne(
+      { pname, username: session.email },
+      { $inc: { quantity: 1 } }, // Increment quantity by 1
+      { upsert: true }           // Insert if the item doesn't exist
+    );
+
+    console.log("Item added to cart:", updateResult);
+
+    // Respond to the client
+    return new Response(
+      JSON.stringify({
+        success: true,
+        message: "Item added to cart successfully.",
+      }),
+      {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+  } catch (error) {
+    console.error("Error in putInCart API:", error);
+    return new Response(
+      JSON.stringify({
+        success: false,
+        message: "Internal server error.",
+      }),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+  } finally {
+    await client.close();
+    console.log("Database connection closed");
+  }
 }

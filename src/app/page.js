@@ -24,7 +24,7 @@ export default function MyApp() {
   const [data, setData] = useState([]);
   const [cartItems, setCartItems] = useState([]);
   const [role, setRole] = useState(null);
-  const [temperature, setTemperature] = useState(null); // New state for temperature
+  const [temperature, setTemperature] = useState(null); 
 
   // Fetch temperature on component load
   useEffect(() => {

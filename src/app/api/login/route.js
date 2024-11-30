@@ -22,7 +22,7 @@ export async function GET(req) {
     const db = client.db(dbName);
     const collection = db.collection("users"); // Correct collection name
 
-    // Query the users collection for the provided username
+    // Query the users collection for the  username
     console.log(`Querying for username: ${username}`);
     const findResult = await collection.findOne({ username: username });
 

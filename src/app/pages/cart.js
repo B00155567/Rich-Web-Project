@@ -7,7 +7,7 @@ import Button from "@mui/material/Button";
 
 export default function Cart() {
   const [cartItems, setCartItems] = useState([]); // State to store cart items
-  const [loading, setLoading] = useState(true); // State for loading spinner
+  const [loading, setLoading] = useState(true); // State for loading 
 
   // Fetch cart items from the API
   useEffect(() => {

@@ -14,7 +14,6 @@ export async function POST(req) {
       );
     }
 
-    // Parse request body
     let body;
     try {
       body = await req.json();

@@ -21,9 +21,9 @@ export default function Home({ runShowDash }) {
         const res = await fetch(`/api/login?username=${username}&pass=${pass}`);
         const result = await res.json();
       
-        console.log(result); // Debug the API response to verify its structure
+        console.log(result); 
       
-        if (result.valid === true) { // Use the correct property and type
+        if (result.valid === true) {
           console.log("Login is valid!");
           runShowDash(); // Call runShowDash if the login is valid
         } else {

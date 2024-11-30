@@ -4,28 +4,21 @@ import { getCustomSession } from "../sessionCode.js";
 export async function GET(req) {
   console.log("In the login API page");
 
-  // Extract username and password from query parameters
   const { searchParams } = new URL(req.url);
   const username = searchParams.get("username");
   const pass = searchParams.get("pass");
 
-  console.log("Received credentials:", { username, pass });
-
   const url = process.env.DB_ADDRESS;
   const client = new MongoClient(url);
-  const dbName = "app"; // Database name
+  const dbName = "app";
 
   try {
     await client.connect();
-    console.log("Connected successfully to server");
-
     const db = client.db(dbName);
-    const collection = db.collection("users"); // Correct collection name
+    const collection = db.collection("users");
 
-    // Query the users collection for the  username
     console.log(`Querying for username: ${username}`);
     const findResult = await collection.findOne({ username: username });
-
     if (!findResult || findResult.pass !== pass) {
       console.log("Invalid username or password");
       return new Response(
@@ -37,10 +30,9 @@ export async function GET(req) {
       );
     }
 
-    // Save session data
     const session = await getCustomSession();
-    session.role = findResult.role || "customer"; // Assign role or default to 'customer'
-    session.email = username; // Store username in session
+    session.role = findResult.role || "customer";
+    session.email = username;
     await session.save();
 
     console.log("Session saved successfully:", { role: session.role, email: session.email });
@@ -54,7 +46,6 @@ export async function GET(req) {
     );
   } catch (error) {
     console.error("Error in login API:", error);
-
     return new Response(
       JSON.stringify({ error: "Internal server error" }),
       {
@@ -64,6 +55,5 @@ export async function GET(req) {
     );
   } finally {
     await client.close();
-    console.log("Database connection closed.");
   }
 }

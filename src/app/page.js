@@ -24,7 +24,7 @@ export default function MyApp() {
   const [data, setData] = useState([]);
   const [cartItems, setCartItems] = useState([]);
   const [role, setRole] = useState(null);
-  const [temperature, setTemperature] = useState(null); 
+  const [temperature, setTemperature] = useState(null);
 
   // Fetch temperature on component load
   useEffect(() => {
@@ -40,7 +40,6 @@ export default function MyApp() {
         console.error("Error fetching temperature:", error);
       }
     }
-
     fetchTemperature();
   }, []);
 
@@ -52,16 +51,15 @@ export default function MyApp() {
 
         if (sessionResult && sessionResult.role) {
           console.log("User role:", sessionResult.role);
-          setRole(sessionResult.role);
+          setRole(sessionResult.role); // Set the role based on the session
         } else {
           console.log("No user session found");
-          setRole(null);
+          setRole(null); // Reset role if no session is found
         }
       } catch (error) {
         console.error("Error fetching session data:", error);
       }
     }
-
     fetchSessionData();
   }, []);
 
@@ -117,58 +115,47 @@ export default function MyApp() {
   }
 
   function runShowLogin() {
-    setShowFirstPage(false);
+    resetViews();
     setShowLogin(true);
-    setShowDash(false);
-    setShowRegister(false);
-    setShowCart(false);
-    setShowAdmin(false);
   }
 
   function runShowDash() {
-    setShowFirstPage(false);
-    setShowLogin(false);
+    resetViews();
     setShowDash(true);
-    setShowRegister(false);
-    setShowCart(false);
-    setShowAdmin(false);
   }
 
   function runShowFirst() {
+    resetViews();
     setShowFirstPage(true);
-    setShowLogin(false);
-    setShowDash(false);
-    setShowRegister(false);
-    setShowCart(false);
-    setShowAdmin(false);
   }
 
   function runShowRegister() {
-    setShowFirstPage(false);
-    setShowLogin(false);
-    setShowDash(false);
+    resetViews();
     setShowRegister(true);
-    setShowCart(false);
-    setShowAdmin(false);
   }
 
   function runShowAdmin() {
+    if (role === "admin") {
+      resetViews();
+      setShowAdmin(true);
+    } else {
+      alert("Access denied. Only admin users can access this page.");
+    }
+  }
+
+  function runShowCart() {
+    resetViews();
+    setShowCart(true);
+    fetchCartItems();
+  }
+
+  function resetViews() {
     setShowFirstPage(false);
     setShowLogin(false);
     setShowDash(false);
     setShowRegister(false);
     setShowCart(false);
-    setShowAdmin(true);
-  }
-
-  function runShowCart() {
-    setShowFirstPage(false);
-    setShowLogin(false);
-    setShowDash(false);
-    setShowRegister(false);
-    setShowCart(true);
     setShowAdmin(false);
-    fetchCartItems();
   }
 
   return (
@@ -202,7 +189,7 @@ export default function MyApp() {
           Shopping Homepage wooop
         </Box>
       )}
-      {showLogin && <Login runShowDash={runShowDash} />}
+      {showLogin && <Login runShowDash={runShowDash} setRole={setRole} />}
       {showRegister && <Register />}
       {showDash && data && Array.isArray(data) && (
         <Box component="section" sx={{ p: 2, border: "1px dashed grey" }}>
@@ -218,7 +205,7 @@ export default function MyApp() {
         </Box>
       )}
       {showAdmin && <Admin />}
-      {showCart && <Cart cartItems={cartItems} />} {/* Ensure Cart is rendered */}
+      {showCart && <Cart cartItems={cartItems} />}
     </Box>
   );
 }

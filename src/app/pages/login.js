@@ -1,16 +1,13 @@
 "use client";
 import * as React from "react";
-import Avatar from "@mui/material/Avatar";
+import Container from "@mui/material/Container";
+import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Checkbox from "@mui/material/Checkbox";
-import Link from "@mui/material/Link";
-import Container from "@mui/material/Container";
-import Box from "@mui/material/Box";
 
-export default function Home({ runShowDash }) {
-  // Accept the prop
+export default function Home({ runShowDash, setRole }) {
   const handleSubmit = async (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
@@ -18,23 +15,30 @@ export default function Home({ runShowDash }) {
     const pass = data.get("pass");
 
     try {
-        const res = await fetch(`/api/login?username=${username}&pass=${pass}`);
-        const result = await res.json();
-      
-        console.log(result); 
-      
-        if (result.valid === true) {
-          console.log("Login is valid!");
-          runShowDash(); // Call runShowDash if the login is valid
-        } else {
-          console.log("Login is not valid.");
-          alert("Invalid login credentials. Please try again.");
-        }
-      } catch (error) {
-        console.error("Error during login:", error);
-        alert("An error occurred. Please try again.");
+      console.log("Submitting login form...");
+      const res = await fetch(`/api/login?username=${username}&pass=${pass}`);
+      const result = await res.json();
+
+      console.log("API Response:", result);
+
+      if (result.valid) {
+        console.log("Login is valid!");
+        console.log("Setting role to:", result.role);
+
+        // Update role state only after successful login
+        setRole(result.role);
+
+        // Navigate to the dashboard
+        runShowDash();
+      } else {
+        console.log("Invalid login credentials.");
+        alert(result.message || "Invalid login credentials. Please try again.");
       }
-  }
+    } catch (error) {
+      console.error("Error during login:", error);
+      alert("An error occurred. Please try again.");
+    }
+  };
 
   return (
     <Container maxWidth="sm">

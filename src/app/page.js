@@ -179,7 +179,7 @@ export default function MyApp() {
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            Shopping
+            Krispy Kreme
           </Typography>
           {temperature !== null && (
             <Typography sx={{ mx: 2 }}>Temperature: {temperature}°C</Typography>

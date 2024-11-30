@@ -10,7 +10,6 @@ import Container from "@mui/material/Container";
 import Box from "@mui/material/Box";
 
 export default function Home({ runShowDash }) {
-  // Accept the prop
   const handleSubmit = async (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
@@ -18,23 +17,30 @@ export default function Home({ runShowDash }) {
     const pass = data.get("pass");
 
     try {
-        const res = await fetch(`/api/login?username=${username}&pass=${pass}`);
-        const result = await res.json();
-      
-        console.log(result); 
-      
-        if (result.valid === true) {
-          console.log("Login is valid!");
-          runShowDash(); // Call runShowDash if the login is valid
-        } else {
-          console.log("Login is not valid.");
-          alert("Invalid login credentials. Please try again.");
-        }
-      } catch (error) {
-        console.error("Error during login:", error);
-        alert("An error occurred. Please try again.");
+      // Secure login request with POST
+      const res = await fetch(`/api/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, pass }),
+      });
+
+      const result = await res.json();
+      console.log(result); // Debugging: Log API response
+
+      if (result.valid) {
+        console.log("Login is valid!");
+        // Handle session or token, if applicable
+        document.cookie = `token=${result.token}; path=/`; // Example of setting a token cookie
+        runShowDash(); // Navigate to dashboard
+      } else {
+        console.log("Login is not valid.");
+        alert(result.message || "Invalid login credentials. Please try again."); // Display backend-provided message
       }
-  }
+    } catch (error) {
+      console.error("Error during login:", error);
+      alert("An error occurred. Please try again.");
+    }
+  };
 
   return (
     <Container maxWidth="sm">

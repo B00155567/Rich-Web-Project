@@ -19,6 +19,7 @@ export async function GET(req) {
 
     console.log(`Querying for username: ${username}`);
     const findResult = await collection.findOne({ username: username });
+
     if (!findResult || findResult.pass !== pass) {
       console.log("Invalid username or password");
       return new Response(
@@ -31,7 +32,7 @@ export async function GET(req) {
     }
 
     const session = await getCustomSession();
-    session.role = findResult.role || "customer";
+    session.role = findResult.acc_type || "customer"; // Updated to use acc_type from the database
     session.email = username;
     await session.save();
 

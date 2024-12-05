@@ -1,0 +1,26 @@
+{
+  "type": "Compass Connections",
+  "version": {
+    "$numberInt": "1"
+  },
+  "connections": [
+    {
+      "id": "52163a3f-873a-4b10-8527-ddcf3065adee",
+      "lastUsed": {
+        "$date": {
+          "$numberLong": "1733081723187"
+        }
+      },
+      "favorite": {
+        "name": "cluster0.mrfze.mongodb.net"
+      },
+      "savedConnectionType": "recent",
+      "connectionOptions": {
+        "connectionString": "mongodb+srv://bob:root@cluster0.mrfze.mongodb.net/",
+        "oidc": {
+          "serializedState": "eyJvaWRjUGx1Z2luU3RhdGVWZXJzaW9uIjowLCJzdGF0ZSI6W119"
+        }
+      }
+    }
+  ]
+}

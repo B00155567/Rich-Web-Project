@@ -75,7 +75,7 @@ export default function Home() {
 
     try {
       const response = await runDBCallAsync(
-        `/api/register?username=${username}&pass=${pass}&firstName=${firstName}&secondName=${secondName}&address=${address}&tel=${tel}`
+        `/api/register?username=${username}&pass=${pass}&firstName=${firstName}&secondName=${secondName}&address=${address}&tel=${tel}&acc_type=${"customer"}`
       );
 
       if (response.success) {

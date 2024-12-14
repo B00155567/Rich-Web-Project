@@ -25,7 +25,7 @@ export async function GET(req) {
     const db = client.db("app");
     const collection = db.collection("cart");
 
-    // Fetch items matching the logged-in user's email
+    // Fetch items matching the logged-in user email
     const cartItems = await collection.find({ username: email }).toArray();
     console.log("Cart items fetched:", cartItems);
 

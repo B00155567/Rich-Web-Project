@@ -45,7 +45,7 @@ export async function POST(req) {
     const db = client.db("app");
     const cartCollection = db.collection("cart");
 
-    // Remove the user's cart items
+    // Remove the user cart items
     const deleteResult = await cartCollection.deleteMany({ username: session.email });
     console.log(`Deleted ${deleteResult.deletedCount} items from cart for user: ${session.email}`);
 

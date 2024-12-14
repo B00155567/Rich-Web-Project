@@ -16,7 +16,7 @@ export async function GET(req) {
       return new Response(
         JSON.stringify({
           success: false,
-          message: "Unauthorized: Please log in to add items to your cart.",
+          message: "Please log in to add items to your cart.",
         }),
         {
           status: 401,

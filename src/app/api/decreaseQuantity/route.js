@@ -44,10 +44,10 @@ export async function PATCH(req) {
     console.log("Item fetched from database:", item);
 
     if (!item) {
-      console.error("Item not found or not authorized");
+      console.error("Item not found ");
       await client.close();
       return new Response(
-        JSON.stringify({ success: false, error: "Item not found or not authorized" }),
+        JSON.stringify({ success: false, error: "Item not found" }),
         { status: 404, headers: { "Content-Type": "application/json" } }
       );
     }
@@ -75,7 +75,7 @@ export async function PATCH(req) {
   } catch (error) {
     console.error("Error in decreaseQuantity API:", error);
     return new Response(
-      JSON.stringify({ success: false, error: "Internal server error" }),
+      JSON.stringify({ success: false, error: "error" }),
       { status: 500, headers: { "Content-Type": "application/json" } }
     );
   }

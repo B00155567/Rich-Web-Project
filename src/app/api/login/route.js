@@ -1,5 +1,6 @@
 import { MongoClient } from "mongodb";
 import { getCustomSession } from "../sessionCode.js";
+import bcrypt from "bcrypt";
 
 export async function GET(req) {
   console.log("In the login API page");
@@ -7,6 +8,17 @@ export async function GET(req) {
   const { searchParams } = new URL(req.url);
   const username = searchParams.get("username");
   const pass = searchParams.get("pass");
+
+  if (!username || !pass) {
+    console.log("Missing username or password");
+    return new Response(
+      JSON.stringify({ valid: false, message: "Username and password are required." }),
+      {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+  }
 
   const url = process.env.DB_ADDRESS;
   const client = new MongoClient(url);
@@ -20,10 +32,10 @@ export async function GET(req) {
     console.log(`Querying for username: ${username}`);
     const findResult = await collection.findOne({ username: username });
 
-    if (!findResult || findResult.pass !== pass) {
-      console.log("Invalid username or password");
+    if (!findResult) {
+      console.log("User not found");
       return new Response(
-        JSON.stringify({ valid: false, message: "Invalid username or password" }),
+        JSON.stringify({ valid: false, message: "Invalid username or password." }),
         {
           status: 401,
           headers: { "Content-Type": "application/json" },
@@ -31,13 +43,31 @@ export async function GET(req) {
       );
     }
 
+    // Compare the hashed password in the database with the plain text password
+    const isPasswordValid = bcrypt.compareSync(pass, findResult.pass);
+    if (!isPasswordValid) {
+      console.log("Invalid password");
+      return new Response(
+        JSON.stringify({ valid: false, message: "Invalid username or password." }),
+        {
+          status: 401,
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+    }
+
+    // Initialize or retrieve the session
     const session = await getCustomSession();
-    session.role = findResult.acc_type || "customer"; // Updated to use acc_type from the database
+    console.log("Session before setting values:", session);
+
+    // Set session properties
+    session.role = findResult.acc_type || "customer"; // Default role is "customer"
     session.email = username;
     await session.save();
 
-    console.log("Session saved successfully:", { role: session.role, email: session.email });
+    console.log("Session after saving:", session);
 
+    // Send a response with the user role
     return new Response(
       JSON.stringify({ valid: true, role: session.role }),
       {
@@ -56,5 +86,6 @@ export async function GET(req) {
     );
   } finally {
     await client.close();
+    console.log("Database connection closed.");
   }
 }

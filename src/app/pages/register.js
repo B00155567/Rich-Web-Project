@@ -7,15 +7,58 @@ import Checkbox from "@mui/material/Checkbox";
 import Container from "@mui/material/Container";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogContentText from "@mui/material/DialogContentText";
+import DialogTitle from "@mui/material/DialogTitle";
+import validator from "email-validator";
 import Login from "./login"; // Import the login page
 
 export default function Home() {
   const [showLogin, setShowLogin] = React.useState(false); // State to toggle between Register and Login
+  const [open, setOpen] = React.useState(false); // State to manage dialog visibility
+  const [errorHolder, setErrorHolder] = React.useState(""); // State to store error messages
+
+  const handleClose = () => setOpen(false); // Close the dialog
+
+  const validateForm = (data) => {
+    let errorMessage = "";
+
+    const username = data.get("username");
+    const pass = data.get("pass");
+    const firstName = data.get("firstName");
+    const secondName = data.get("secondName");
+    const address = data.get("address");
+    const tel = data.get("tel");
+
+    if (!validator.validate(username)) {
+      errorMessage += "Invalid email format. ";
+    }
+    if (!pass || pass.length < 6) {
+      errorMessage += "Password must be at least 6 characters long. ";
+    }
+    if (!firstName || !secondName || !address || !tel) {
+      errorMessage += "All fields are required. ";
+    }
+
+    return errorMessage;
+  };
 
   const handleSubmit = async (event) => {
     console.log("Handling submit");
     event.preventDefault();
     const data = new FormData(event.currentTarget);
+
+    // Validate form data
+    const errorMessage = validateForm(data);
+
+    if (errorMessage.length > 0) {
+      setErrorHolder(errorMessage);
+      setOpen(true); // Show dialog with error messages
+      return;
+    }
+
     let username = data.get("username");
     let pass = data.get("pass");
     let firstName = data.get("firstName");
@@ -37,7 +80,6 @@ export default function Home() {
 
       if (response.success) {
         console.log("Registration successful!");
-        //alert("Registration successful! Redirecting to login...");
         setShowLogin(true); // Show login component
       } else {
         console.log("Registration failed:", response.message);
@@ -57,7 +99,6 @@ export default function Home() {
     return res.json();
   }
 
-  // If `showLogin` is true, render the Login component
   if (showLogin) {
     return <Login />;
   }
@@ -146,6 +187,17 @@ export default function Home() {
             Register
           </Button>
         </Box>
+        <Dialog open={open} onClose={handleClose}>
+          <DialogTitle>{"Error"}</DialogTitle>
+          <DialogContent>
+            <DialogContentText>{errorHolder}</DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleClose} autoFocus>
+              Close
+            </Button>
+          </DialogActions>
+        </Dialog>
       </Box>
     </Container>
   );

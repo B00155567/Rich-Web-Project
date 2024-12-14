@@ -26,7 +26,7 @@ export default function Home({ runShowDash, setRole }) {
         console.log("Setting role to:", result.role);
 
         // Update role state only after successful login
-        setRole(result.role);
+        //setRole(result.role);
 
         // Navigate to the dashboard
         runShowDash();
